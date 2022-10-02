@@ -1,20 +1,56 @@
-int incomingByte = 0;
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_MS_PWMServoDriver.h"
+
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+int input = 0;
+int right_sensor_pin = A0;
+int left_sensor_pin = A1;
+Adafruit_DCMotor *right_motor = AFMS.getMotor(1);
+Adafruit_DCMotor *left_motor = AFMS.getMotor(2);
+
+int forward_speed = 150;
+int sensor_threshold = 512;
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
-
+  AFMS.begin();
+  right_motor->setSpeed(forward_speed);
+  left_motor->setSpeed(forward_speed);
+  Serial.println("Type \"f\" to increase speed or \"s\" to decrease speed");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  // send data only when you receive data:
+  right_motor->setSpeed(forward_speed);
+  left_motor->setSpeed(forward_speed);
   if (Serial.available() > 0) {
-    // read the incoming byte:
-    incomingByte = Serial.read();
-
-    // say what you got:
-    Serial.print("I received: ");
-    Serial.println(incomingByte, DEC);
+    input = Serial.read();
+    if (input == 102) {
+      forward_speed++;
+      Serial.print("Speed: ");
+      Serial.println(forward_speed);
+      
+    }
+    else if (input == 115) {
+      forward_speed--;
+      Serial.print("Speed: ");
+      Serial.println(forward_speed);
+    }
+    else if (input != 10) {
+      Serial.println("Invalid input");
+    }
   }
+  if (analogRead(right_sensor_pin) > sensor_threshold) {
+    right_motor->run(RELEASE);
+    left_motor->run(FORWARD);
+  }
+  else if (analogRead(left_sensor_pin) > sensor_threshold) {
+    right_motor->run(FORWARD);
+    left_motor->run(RELEASE);
+  }
+  else {
+    right_motor->run(FORWARD);
+    left_motor->run(FORWARD);
+  }
+  delay(50);
 }
