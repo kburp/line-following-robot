@@ -7,14 +7,14 @@
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 int input = 0;
 int right_sensor_pin = A0;
-int left_sensor_pin = A1;
+int left_sensor_pin = A2;
 Adafruit_DCMotor *right_motor = AFMS.getMotor(1);
 Adafruit_DCMotor *left_motor = AFMS.getMotor(2);
 
 // set initial sensor and motor values
 int forward_speed = 0;
 int sensor_threshold = 900;
-int default_forward_speed = 150;
+int default_forward_speed = 30;
 
 void setup() {
   // begin serial communication and the motor shield
@@ -66,18 +66,18 @@ void loop() {
   }
   // turn right if the right sensor is on the line
   if (analogRead(right_sensor_pin) > sensor_threshold) {
-    right_motor->run(RELEASE);
+    right_motor->run(BACKWARD);
     left_motor->run(FORWARD);
   }
   // turn left if the left sensor is on the line
   else if (analogRead(left_sensor_pin) > sensor_threshold) {
     right_motor->run(FORWARD);
-    left_motor->run(RELEASE);
+    left_motor->run(BACKWARD);
   }
   // move forward if neither sensor is on the line
   else {
-    right_motor->run(FORWARD);
-    left_motor->run(FORWARD);
+    right_motor->run(BACKWARD);
+    left_motor->run(BACKWARD);
   }
   delay(50);
 }
